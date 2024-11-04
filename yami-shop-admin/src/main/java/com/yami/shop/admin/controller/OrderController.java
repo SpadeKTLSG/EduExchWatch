@@ -35,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -70,8 +69,7 @@ public class OrderController {
      * 分页获取
      */
     @GetMapping("/page")
-    @PreAuthorize("@pms.hasPermission('order:order:page')")
-    public ServerResponseEntity<IPage<Order>> page(OrderParam orderParam,PageParam<Order> page) {
+    public ServerResponseEntity<IPage<Order>> page(OrderParam orderParam, PageParam<Order> page) {
         Long shopId = SecurityUtils.getSysUser().getShopId();
         orderParam.setShopId(shopId);
         IPage<Order> orderPage = orderService.pageOrdersDetailByOrderParam(page, orderParam);
@@ -84,7 +82,6 @@ public class OrderController {
      * 获取信息
      */
     @GetMapping("/orderInfo/{orderNumber}")
-    @PreAuthorize("@pms.hasPermission('order:order:info')")
     public ServerResponseEntity<Order> info(@PathVariable("orderNumber") String orderNumber) {
         Long shopId = SecurityUtils.getSysUser().getShopId();
         Order order = orderService.getOrderByOrderNumber(orderNumber);
@@ -102,7 +99,6 @@ public class OrderController {
      * 发货
      */
     @PutMapping("/delivery")
-    @PreAuthorize("@pms.hasPermission('order:order:delivery')")
     public ServerResponseEntity<Void> delivery(@RequestBody DeliveryOrderParam deliveryOrderParam) {
         Long shopId = SecurityUtils.getSysUser().getShopId();
         Order order = orderService.getOrderByOrderNumber(deliveryOrderParam.getOrderNumber());
@@ -123,7 +119,7 @@ public class OrderController {
         List<OrderItem> orderItems = orderItemService.getOrderItemsByOrderNumber(deliveryOrderParam.getOrderNumber());
         for (OrderItem orderItem : orderItems) {
             productService.removeProductCacheByProdId(orderItem.getProdId());
-            skuService.removeSkuCacheBySkuId(orderItem.getSkuId(),orderItem.getProdId());
+            skuService.removeSkuCacheBySkuId(orderItem.getSkuId(), orderItem.getProdId());
         }
         return ServerResponseEntity.success();
     }
@@ -137,7 +133,6 @@ public class OrderController {
      * @param consignmentAddr   发货地址
      */
     @GetMapping("/waitingConsignmentExcel")
-    @PreAuthorize("@pms.hasPermission('order:order:waitingConsignmentExcel')")
     public void waitingConsignmentExcel(Order order, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date startTime,
                                         @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date endTime, String consignmentName, String consignmentMobile,
                                         String consignmentAddr, HttpServletResponse response) {
@@ -192,7 +187,6 @@ public class OrderController {
      * @param order
      */
     @GetMapping("/soldExcel")
-    @PreAuthorize("@pms.hasPermission('order:order:soldExcel')")
     public void soldExcel(Order order, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date startTime,
                           @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date endTime, HttpServletResponse response) {
         Long shopId = SecurityUtils.getSysUser().getShopId();

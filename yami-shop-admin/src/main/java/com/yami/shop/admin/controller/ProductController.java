@@ -10,6 +10,7 @@
 
 package com.yami.shop.admin.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -26,12 +27,10 @@ import com.yami.shop.service.BasketService;
 import com.yami.shop.service.ProdTagReferenceService;
 import com.yami.shop.service.ProductService;
 import com.yami.shop.service.SkuService;
-import cn.hutool.core.bean.BeanUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -63,7 +62,6 @@ public class ProductController {
      * 分页获取商品信息
      */
     @GetMapping("/page")
-    @PreAuthorize("@pms.hasPermission('prod:prod:page')")
     public ServerResponseEntity<IPage<Product>> page(ProductParam product, PageParam<Product> page) {
         IPage<Product> products = productService.page(page,
                 new LambdaQueryWrapper<Product>()
@@ -78,7 +76,6 @@ public class ProductController {
      * 获取信息
      */
     @GetMapping("/info/{prodId}")
-    @PreAuthorize("@pms.hasPermission('prod:prod:info')")
     public ServerResponseEntity<Product> info(@PathVariable("prodId") Long prodId) {
         Product prod = productService.getProductByProdId(prodId);
         if (!Objects.equals(prod.getShopId(), SecurityUtils.getSysUser().getShopId())) {
@@ -97,7 +94,6 @@ public class ProductController {
      * 保存
      */
     @PostMapping
-    @PreAuthorize("@pms.hasPermission('prod:prod:save')")
     public ServerResponseEntity<String> save(@Valid @RequestBody ProductParam productParam) {
         checkParam(productParam);
 
@@ -117,7 +113,6 @@ public class ProductController {
      * 修改
      */
     @PutMapping
-    @PreAuthorize("@pms.hasPermission('prod:prod:update')")
     public ServerResponseEntity<String> update(@Valid @RequestBody ProductParam productParam) {
         checkParam(productParam);
         Product dbProduct = productService.getProductByProdId(productParam.getProdId());
@@ -180,7 +175,6 @@ public class ProductController {
      * 批量删除
      */
     @DeleteMapping
-    @PreAuthorize("@pms.hasPermission('prod:prod:delete')")
     public ServerResponseEntity<Void> batchDelete(@RequestBody Long[] prodIds) {
         for (Long prodId : prodIds) {
             delete(prodId);
@@ -192,7 +186,6 @@ public class ProductController {
      * 更新商品状态
      */
     @PutMapping("/prodStatus")
-    @PreAuthorize("@pms.hasPermission('prod:prod:status')")
     public ServerResponseEntity<Void> shopStatus(@RequestParam Long prodId, @RequestParam Integer prodStatus) {
         Product product = new Product();
         product.setProdId(prodId);
@@ -226,6 +219,7 @@ public class ProductController {
         for (Sku sku : skuList) {
             if (sku.getStatus() == 1) {
                 isAllUnUse = false;
+                break;
             }
         }
         if (isAllUnUse) {
